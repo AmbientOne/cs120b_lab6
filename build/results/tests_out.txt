@@ -1,10 +1,10 @@
-Breakpoint 1 at 0x5dc: file source/main.c, line 176.
+Breakpoint 1 at 0x4b6: file source/main.c, line 146.
 Note: automatically using hardware breakpoints for read-only addresses.
 ======================================================
 Running all tests..."
 
-"start"...
-	Expected 0x01 but got PORTB:7"next"...
-	Expected 0x02 but got PORTB:7"timer"...
-	Expected 0x01 but got PORTB:7======================================================
+"PORTB = 0x01"..."PORTB = 0x02"..."PAUSE"..."UNPAUSE"...
+	Expected 0x01 
+	PORTB '0x800025:	0x04
+======================================================
 [Inferior 1 (Remote target) detached]

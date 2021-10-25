@@ -1,12 +1,14 @@
-
 /*	Author: Abdirahman Abdi
- *  Partner(s) Name: 
- *	Lab Section:
- *	Assignment: Lab #6 Exercise #3
+ *  Partner(s) Name: N/A
+ *	Lab Section:021
+ *	Assignment: Lab #6  Exercise #2
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *
+ 
+ *	Demo link:
  */
 
 #include <avr/io.h>
@@ -48,140 +50,102 @@ void TimerSet (unsigned long M) {
 	_avr_timer_cntcurr = _avr_timer_M;
 }
 unsigned char flag = 0;
-unsigned char i = 0;
-enum States{Start, firstState, increment, inc, dec, decrement, reset} state;
-
+enum States {Start, firstLed, secLed, thirdLed, pause, restart} state;
 
 void Tick() {
-    unsigned char press = ~PINA & 0x03;
-    switch(state){
-        case Start:
-            PORTB = 0x07;
-            state = firstState;
-            break;
+unsigned char press = ~PINA & 0x01;
+ switch(state) {
+   case Start:
+   state = firstLed;   break;
 
-        case firstState:
-            if(press == 0x01) 
-                state = inc;
-            else if(press == 0x02) {
-                state = dec;
-            }
-            else if(press == 0x03){
-                PORTB = 0x00;
-                state = reset;
-            }
-            break;
+   case firstLed:
+   flag  = 0;
+   if(press){
+	   state = pause;
+   }
+   else{
+	state = secLed;
+   }
+   break;
 
-        case inc:
-            state = increment;
-            i = 0;
-            flag = 0;
-            break;
+   case secLed:
+   if(press){
+           state = pause;
+   }
+   else if(flag == 0) {
+           state = thirdLed;
+   }
+   else if(flag == 1) {
+	   state = firstLed;
+   }
+   break;
 
-        case dec:
-            state = decrement;
-            i = 0;
-            flag = 0;
-            break;
+   case thirdLed:
+   flag = 1;
+   if(press){
+           state = pause;
+   }
+   else{
+           state = secLed;
+   }
 
-        case reset:
-            if(press == 0x03) state = reset;
-            else state = firstState;
-            break;
-        
-        case increment:
-            if(press == 0x01){
-                flag = 1;
+   break;
 
-                if(i == 10) {
-                    state = inc;
-                }
-                else state = increment;
-            }
-            else if(press == 0x00){
-                state = firstState;
-            }
-            else if(press == 0x02) {
-                state = decrement;
-            }
-            else if(press == 0x03){
-                PORTB = 0x00;
-                state = reset;
-            }
-            break;
+   case pause:
+   if(press){
+	   state = pause;
+   }else{
+	   state = restart;
+   }
+   break;
 
-        case decrement:
-            if(press == 0x02){
-                flag = 1;
+   case restart:
+   if(press){
+	   state = Start;
+   }
 
-                if(i == 10) {
-                    state = dec;
-                }
-                else state = decrement;
-            }
-            else if(press == 0x00) state = firstState;
-            
-            else if(press == 0x01) state = inc;
-    
-            else if(press == 0x03) state = reset;
-    
-            break;
-            
-        default:
-            break;
-    }
-    
-    switch(state){
-        case Start:
-            
-            break;
-        case firstState:
-            break;
-        case inc:
-            if(PORTB < 9){
-                PORTB++;
-            }
-            flag = 0;
-            i = 0;
-            state = increment;
-            break;
-        case increment:
-            break;
-        case dec:
-            if(PORTB > 0){
-                PORTB--;
-            }
-            i = 0;
-            flag = 0;
-            state = decrement;
-            break;
-        case decrement:
-            break;
-        case reset:
-                PORTB = 0x00;
-            break;
-        default:
-            break;
-    }
- 
+   break;
+
+   default:
+   	state = Start;
+	break;
+ }
+
+ switch(state) {
+   case Start:  break;
+
+   case firstLed:
+   PORTB = 0x01;
+   break;
+
+   case secLed:
+   PORTB = 0x02;  break;
+
+   case thirdLed:
+   PORTB = 0x04;  break;
+
+   case pause:
+   break;
+
+   case restart:
+   break;
+
+
+
+ }
 }
-        
 
 
 int main(void) {
     DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
-    TimerSet(100);
+    state = Start;
+    TimerSet(300);
     TimerOn();
-
     while (1) {
-        Tick();
-        while(!TimerFlag);
-        TimerFlag = 0;
-        if(flag == 1) {
-            i++;
-        }
-
+    	Tick();
+	while(!TimerFlag);
+	TimerFlag = 0;
     }
     return 1;
 }
